@@ -320,12 +320,44 @@ main {
   overflow: hidden;
 }
 .day.today {
-  box-shadow: inset 4px 0 0 var(--crab-soft), var(--shadow);
+  box-shadow: 0 0 0 2px var(--crab-soft), 0 4px 12px rgba(192, 38, 45, 0.18);
+}
+.day.today .day-date {
+  background: color-mix(in srgb, var(--crab-soft) 20%, transparent);
+}
+.day.today .day-wd {
+  color: var(--crab-soft);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 .day-summary {
   display: flex;
   width: 100%;
   text-align: left;
+  transition: background 0.15s;
+}
+.day-summary:active {
+  background: color-mix(in srgb, var(--water) 10%, transparent);
+}
+@media (hover: hover) {
+  .day-summary:hover {
+    background: color-mix(in srgb, var(--water) 6%, transparent);
+  }
+}
+/* Flecha que indica que la fila se despliega */
+.day-chevron {
+  flex: none;
+  align-self: center;
+  width: 20px;
+  height: 20px;
+  margin: 0 6px 0 -2px;
+  color: var(--muted);
+  transition: transform 0.2s;
+}
+.day.open .day-chevron {
+  transform: rotate(180deg);
+  color: var(--water);
 }
 .day-date {
   flex: none;

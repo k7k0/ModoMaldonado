@@ -12,7 +12,7 @@ import {
   windColor,
   windguruUrl,
 } from '../lib/weather.js';
-import { Drop, Moon, Sky, Sunrise, Sunset, Thermo, TideLevel, Wind } from './icons.jsx';
+import { ChevronDown, Drop, Moon, Sky, Sunrise, Sunset, Thermo, TideLevel, Wind } from './icons.jsx';
 import TideChart from './TideChart.jsx';
 import WeatherStrip from './WeatherStrip.jsx';
 import PortInfo from './PortInfo.jsx';
@@ -34,7 +34,12 @@ function DayRow({ dayKey, label, dayEvents, events, levelOf, wxHours, wxFetchedA
 
   return (
     <article className={`day${isToday ? ' today' : ''}${open ? ' open' : ''}`}>
-      <button className="day-summary" onClick={() => onToggle(dayKey)} aria-expanded={open}>
+      <button
+        className="day-summary"
+        onClick={() => onToggle(dayKey)}
+        aria-expanded={open}
+        title={open ? 'Ocultar detalle' : 'Ver detalle del día'}
+      >
         <div className="day-date">
           <span className="day-wd">{label ?? WEEKDAYS[p.wd]}</span>
           <span className="day-num">{p.d}</span>
@@ -64,6 +69,7 @@ function DayRow({ dayKey, label, dayEvents, events, levelOf, wxHours, wxFetchedA
           </div>
           {wx && <WeatherSummary wx={wx} sky={sky} />}
         </div>
+        <ChevronDown className="day-chevron" />
       </button>
       {open && <DayDetail {...{ dayKey, start, p, moon, dayEvents, events, wxHours, wxFetchedAt, port, now }} />}
     </article>
