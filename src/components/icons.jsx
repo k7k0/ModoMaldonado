@@ -99,6 +99,55 @@ export const Drop = () => (
   </svg>
 );
 
+const CLOUD = 'M7.5 19h9a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6 1.2A3.4 3.4 0 0 0 7.5 19z';
+
+/**
+ * Estado del cielo (ver skyKind). De noche, luna en vez de sol.
+ */
+export function Sky({ kind, night = false, size = 22 }) {
+  const body = night ? (
+    <path className="sky-moon" d="M14.5 3.5a6.5 6.5 0 1 0 6 8.8 5.2 5.2 0 0 1-6-8.8z" />
+  ) : (
+    <g className="sky-sun">
+      <circle cx="12" cy="10" r="4" />
+      <path d="M12 2.5v1.8M12 15.7v1.8M4.5 10h1.8M17.7 10h1.8M6.7 4.7 8 6M16 14l1.3 1.3M6.7 15.3 8 14M16 6l1.3-1.3" />
+    </g>
+  );
+  const small = 'translate(4 3) scale(.8)';
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" className="sky">
+      {kind === 'clear' && body}
+      {kind === 'partly' && (
+        <>
+          <g transform="translate(-3 -2)">{body}</g>
+          <path className="sky-cloud" d={CLOUD} transform={small} />
+        </>
+      )}
+      {kind === 'cloudy' && (
+        <>
+          <g transform="translate(-3 -3) scale(.85)">{body}</g>
+          <path className="sky-cloud" d={CLOUD} transform="translate(1 1)" />
+        </>
+      )}
+      {kind === 'overcast' && (
+        <>
+          <path className="sky-cloud dim" d={CLOUD} transform="translate(-3 -4) scale(.85)" />
+          <path className="sky-cloud" d={CLOUD} transform="translate(1 1)" />
+        </>
+      )}
+      {(kind === 'rain' || kind === 'heavy') && (
+        <>
+          <path className="sky-cloud" d={CLOUD} transform="translate(0 -4)" />
+          <path
+            className="sky-rain"
+            d={kind === 'heavy' ? 'M8 17l-1.5 4M12 17l-1.5 4M16 17l-1.5 4' : 'M9.5 17.5l-1 3M14.5 17.5l-1 3'}
+          />
+        </>
+      )}
+    </svg>
+  );
+}
+
 /** "Mi ubicación": mira con punto central. */
 export const Locate = () => (
   <svg viewBox="0 0 24 24" width="22" height="22" {...base}>

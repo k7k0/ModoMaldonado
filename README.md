@@ -38,7 +38,8 @@ Las descargas se cachean en `scripts/.cache` (borrarla para forzar una nueva des
 - **Altura actual / curva:** interpolación cosenoidal entre mareas consecutivas.
 - **Sol y luna:** calculados localmente (algoritmo NOAA y mes sinódico medio).
 - **Pronóstico del tiempo** (viento en km/h, ráfagas, temperatura, lluvia): [Open-Meteo](https://open-meteo.com),
-  CC BY 4.0. Es lo único que se consulta online; se guarda en el navegador y se refresca cada hora.
+  CC BY 4.0. Viento, ráfagas y temperatura del modelo GFS (el que Windguru muestra por defecto);
+  lluvia como mediana de GFS, ECMWF e ICON, ignorando menos de 0.2 mm/h. Es lo único que se consulta online; se guarda en el navegador y se refresca cada hora.
   Sin conexión se muestra el último pronóstico (hasta 3 días). Los spots de Windguru por puerto se
   configuran en `WINDGURU_SPOTS` (`src/lib/weather.js`).
 

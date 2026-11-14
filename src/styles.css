@@ -24,6 +24,8 @@
   --wind-5: #d9475f;
   --wind-text: #1d2530;
   --staff: #f7ecd7;
+  --cloud: #b9c3cc;
+  --cloud-dim: #d6dce1;
   --staff-ink: #2a2f38;
   --radius: 12px;
   --shadow: 0 1px 3px rgba(60, 45, 20, 0.12);
@@ -54,6 +56,8 @@
     --wind-5: #9e2942;
     --wind-text: #f1ede6;
     --staff: #e9dcc0;
+    --cloud: #aab4bf;
+    --cloud-dim: #6b7682;
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     color-scheme: dark;
   }
@@ -494,11 +498,40 @@ main {
   stroke-dasharray: 3 2;
 }
 
+/* Íconos de cielo */
+.sky-sun {
+  fill: var(--accent);
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.sky-moon {
+  fill: var(--moon-lit);
+}
+.sky-cloud {
+  fill: var(--cloud);
+  stroke: var(--card);
+  stroke-width: 1.2;
+}
+.sky-cloud.dim {
+  fill: var(--cloud-dim);
+}
+.sky-rain {
+  stroke: var(--water);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  fill: none;
+}
+
 /* Franja de pronóstico alineada con el gráfico */
 .wx {
   position: relative;
   margin: -2px 0 6px;
   font-variant-numeric: tabular-nums;
+}
+.wx-sky {
+  display: grid;
+  place-items: center;
 }
 .wx-labels {
   position: absolute;
