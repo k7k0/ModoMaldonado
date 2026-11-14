@@ -75,6 +75,9 @@ body {
   color: var(--text);
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
+  /* Nada se desplaza a lo ancho (en iPhone se arrastraba la pantalla de costado). */
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
 }
 
 button {
@@ -87,6 +90,7 @@ button {
 }
 
 .app {
+  overflow-x: clip;
   max-width: 560px;
   margin: 0 auto;
   min-height: 100dvh;
@@ -193,13 +197,22 @@ main {
 
 .date-btn-wrap {
   position: relative;
+  overflow: hidden;
+  border-radius: 50%;
 }
+/* Safari en iPhone da a los campos de fecha un ancho mínimo propio: se fuerza al del botón. */
 .date-input {
   position: absolute;
   inset: 0;
   opacity: 0;
   pointer-events: none;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  border: 0;
+  padding: 0;
 }
 
 /* ---------- Estado actual ---------- */

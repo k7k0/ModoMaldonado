@@ -47,9 +47,8 @@ Las descargas se cachean en `scripts/.cache` (borrarla para forzar una nueva des
 
 - `design/`: originales (fotos y bosquejo del logo). En `public/photos` van las versiones
   recortadas en WebP; el logo vectorizado está en `src/components/Logo.jsx` y `public/icon.svg`.
-- La foto de la tarjeta de estado depende del momento (ver `PHOTOS` en `StatusCard.jsx`): atardecer
-  (±75 min de salida/puesta del sol), noche, marea baja (en el 30% inferior entre bajamar y pleamar),
-  cielo cubierto o lluvia según el pronóstico, y día. Dentro de cada grupo rota cada hora.
+- La foto de la tarjeta de estado depende sólo de la hora: una por cada franja de 2 horas
+  (ver `PHOTOS` en `StatusCard.jsx`).
 - Fotos nuevas: dejar los originales en `design/nuevas/` (ignorada por git). Se enderezan, se recortan
   a 1.8:1 con el motivo en la franja central, se pasan a WebP de 1200 px sin metadatos (sin GPS)
   y van a `public/photos/`; agregarlas también a la lista de precarga de `public/sw.js`.

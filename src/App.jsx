@@ -136,7 +136,7 @@ export default function App() {
       </header>
 
       <main>
-        <StatusCard port={port} events={events} forecast={wx} now={now} />
+        <StatusCard port={port} events={events} now={now} />
 
         {day && (
           <div className="viewing">
