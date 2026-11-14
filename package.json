@@ -1,0 +1,21 @@
+{
+  "name": "modo-maldonado",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview --host",
+    "data:scrape": "node scripts/scrape-secondary.mjs && node scripts/scrape-primary.mjs",
+    "data:build": "node scripts/build-data.mjs"
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "4.3.4",
+    "vite": "5.4.11"
+  }
+}

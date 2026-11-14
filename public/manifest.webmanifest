@@ -1,0 +1,10 @@
+{
+  "name": "Modo Maldonado · Mareas",
+  "short_name": "Mareas",
+  "lang": "es-AR",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#eef1f6",
+  "theme_color": "#2457c5",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
