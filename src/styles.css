@@ -144,6 +144,32 @@ main {
   background: rgba(255, 255, 255, 0.15);
 }
 
+.icon-btn.busy svg {
+  animation: pulse 0.9s ease-in-out infinite alternate;
+}
+@keyframes pulse {
+  to {
+    opacity: 0.3;
+  }
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 30;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--ink-900);
+  color: #fff;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  animation: reveal 0.2s ease-out;
+}
+
 .date-btn-wrap {
   position: relative;
 }

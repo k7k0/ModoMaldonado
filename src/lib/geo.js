@@ -23,14 +23,18 @@ export function nearestPort(ports, pos) {
   return best;
 }
 
-/** Ubicación actual del dispositivo; null si se deniega o falla. */
+/**
+ * Ubicación actual del dispositivo (pide permiso la primera vez).
+ * Rechaza con Error cuyo `code` es 'denied', 'unavailable' o 'unsupported'.
+ */
 export function getPosition() {
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) return resolve(null);
+  return new Promise((resolve, reject) => {
+    const fail = (code) => reject(Object.assign(new Error(code), { code }));
+    if (!navigator.geolocation) return fail('unsupported');
     navigator.geolocation.getCurrentPosition(
       (p) => resolve({ lat: p.coords.latitude, lon: p.coords.longitude }),
-      () => resolve(null),
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 10 * 60000 },
+      (err) => fail(err.code === err.PERMISSION_DENIED ? 'denied' : 'unavailable'),
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 10 * 60000 },
     );
   });
 }

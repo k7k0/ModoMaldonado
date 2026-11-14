@@ -1,15 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { dataRange, loadEvents, portById, ports } from './lib/tides.js';
-import { getPosition, nearestPort } from './lib/geo.js';
+import { distanceKm, getPosition, nearestPort } from './lib/geo.js';
 import { dayKey } from './lib/time.js';
 import { useNow, useStoredState } from './hooks.js';
 import StatusCard from './components/StatusCard.jsx';
 import DayList from './components/DayList.jsx';
 import PortPicker from './components/PortPicker.jsx';
-import { Calendar, ChevronDown } from './components/icons.jsx';
+import { Calendar, ChevronDown, Locate } from './components/icons.jsx';
 import Logo from './components/Logo.jsx';
 
 const DEFAULT_PORT = 'S-RINCON-DE-BAHIA-BLANCA-PUERTO-CUATREROS-MALDO'; // Puerto Cuatreros (Maldo)
+
+const LOCATE_ERRORS = {
+  denied: 'Permiso de ubicación denegado. Podés habilitarlo en la configuración del navegador.',
+  unavailable: 'No se pudo obtener tu ubicación. Probá de nuevo.',
+  unsupported: 'Este navegador no permite obtener la ubicación.',
+};
 
 export default function App() {
   const now = useNow();
@@ -20,18 +26,16 @@ export default function App() {
   const [pos, setPos] = useState(null);
   const [events, setEvents] = useState(null);
   const [picking, setPicking] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [toast, setToast] = useState(null);
   const dateInput = useRef(null);
   const port = portById.get(portId);
 
-  // Al abrir: ubicación -> puerto más cercano (si el usuario todavía no eligió otro).
-  const chosen = useRef(false);
   useEffect(() => {
-    getPosition().then((p) => {
-      if (!p) return;
-      setPos(p);
-      if (!chosen.current) setPortId(nearestPort(ports, p).id);
-    });
-  }, []);
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), 4500);
+    return () => clearTimeout(id);
+  }, [toast]);
 
   useEffect(() => {
     let alive = true;
@@ -44,7 +48,6 @@ export default function App() {
 
   const selectPort = useCallback(
     (id) => {
-      chosen.current = true;
       setPortId(id);
       setSavedId(id);
       setPicking(false);
@@ -52,6 +55,24 @@ export default function App() {
     },
     [setSavedId],
   );
+
+  // La ubicación sólo se pide cuando el usuario toca "mi ubicación".
+  const locate = async () => {
+    if (locating) return;
+    setLocating(true);
+    try {
+      const p = await getPosition();
+      const nearest = nearestPort(ports, p);
+      setPos(p);
+      selectPort(nearest.id);
+      const km = distanceKm(p.lat, p.lon, nearest.lat, nearest.lon);
+      setToast(`Puerto más cercano: ${nearest.name} (${km < 10 ? km.toFixed(1) : Math.round(km)} km)`);
+    } catch (err) {
+      setToast(LOCATE_ERRORS[err.code] ?? LOCATE_ERRORS.unavailable);
+    } finally {
+      setLocating(false);
+    }
+  };
 
   const openDatePicker = () => {
     const el = dateInput.current;
@@ -73,6 +94,14 @@ export default function App() {
           <span className="port-name">{port.name}</span>
           {port.area && <span className="port-area">{port.area}</span>}
           <ChevronDown className="port-chevron" />
+        </button>
+        <button
+          className={`icon-btn${locating ? ' busy' : ''}`}
+          onClick={locate}
+          aria-label="Usar mi ubicación"
+          title="Puerto más cercano a mi ubicación"
+        >
+          <Locate />
         </button>
         <div className="date-btn-wrap">
           <button className="icon-btn" onClick={openDatePicker} aria-label="Elegir fecha">
@@ -118,6 +147,12 @@ export default function App() {
         </a>{' '}
         · Licencia MIT
       </footer>
+
+      {toast && (
+        <div className="toast" role="status" onClick={() => setToast(null)}>
+          {toast}
+        </div>
+      )}
 
       {picking && <PortPicker currentId={portId} pos={pos} onSelect={selectPort} onClose={() => setPicking(false)} />}
     </div>

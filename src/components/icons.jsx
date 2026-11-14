@@ -74,6 +74,15 @@ export const Pin = () => (
   </svg>
 );
 
+/** "Mi ubicación": mira con punto central. */
+export const Locate = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" {...base}>
+    <circle cx="12" cy="12" r="7" />
+    <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+    <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+  </svg>
+);
+
 export const ChevronDown = (p) => (
   <svg viewBox="0 0 24 24" width="18" height="18" {...base} {...p}>
     <path d="m6 9 6 6 6-6" />
