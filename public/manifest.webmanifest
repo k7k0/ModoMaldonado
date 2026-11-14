@@ -4,7 +4,7 @@
   "lang": "es-AR",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#eef1f6",
-  "theme_color": "#2457c5",
-  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+  "background_color": "#f4ede1",
+  "theme_color": "#26394b",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
 }

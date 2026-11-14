@@ -7,8 +7,9 @@ import StatusCard from './components/StatusCard.jsx';
 import DayList from './components/DayList.jsx';
 import PortPicker from './components/PortPicker.jsx';
 import { Calendar, ChevronDown } from './components/icons.jsx';
+import Logo from './components/Logo.jsx';
 
-const DEFAULT_PORT = 'MARD';
+const DEFAULT_PORT = 'S-RINCON-DE-BAHIA-BLANCA-PUERTO-CUATREROS-MALDO'; // Puerto Cuatreros (Maldo)
 
 export default function App() {
   const now = useNow();
@@ -67,6 +68,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="topbar">
+        <Logo size={34} className="logo" />
         <button className="port-btn" onClick={() => setPicking(true)}>
           <span className="port-name">{port.name}</span>
           {port.area && <span className="port-area">{port.area}</span>}

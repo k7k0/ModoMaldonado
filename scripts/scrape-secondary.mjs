@@ -9,9 +9,15 @@ const select = form.match(/<select[^>]*NAME="Psec"[\s\S]*?<\/select>/i)[0];
 // Las <option> no tienen value: el navegador envía el texto con espacios colapsados.
 const names = [...select.matchAll(/<option[^>]*>([\s\S]*?)<\/option>/gi)].map((m) => text(m[1]));
 
+// Nombres propios de la app (el SHN se consulta siempre con el nombre original).
+const RENAMES = {
+  'RINCÓN DE BAHÍA BLANCA - PUERTO CUATREROS (Muelle)': 'RINCÓN DE BAHÍA BLANCA - PUERTO CUATREROS (Maldo)',
+};
+
 const ports = [];
-for (const name of names) {
-  const html = await fetchCached(BASE + 'R_TPSMareas.asp?Psec=' + encodeURIComponent(name));
+for (const shnName of names) {
+  const html = await fetchCached(BASE + 'R_TPSMareas.asp?Psec=' + encodeURIComponent(shnName));
+  const name = RENAMES[shnName] ?? shnName;
   const patron = text(html.match(/Puerto Patr[^:]*:([\s\S]*?)<\//i)[1]);
   // Última fila de la tabla = valores numéricos.
   const rows = [...html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)].map((m) => cells(m[1])).filter((r) => r.length >= 10);

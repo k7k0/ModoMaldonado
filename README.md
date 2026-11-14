@@ -35,3 +35,11 @@ Las descargas se cachean en `scripts/.cache` (borrarla para forzar una nueva des
   pleamar (hora) o cero (altura) y el puerto se marca como aproximado.
 - **Altura actual / curva:** interpolación cosenoidal entre mareas consecutivas.
 - **Sol y luna:** calculados localmente (algoritmo NOAA y mes sinódico medio).
+
+## Diseño
+
+- `design/`: originales (fotos y bosquejo del logo). En `public/photos` van las versiones
+  recortadas en WebP; el logo vectorizado está en `src/components/Logo.jsx` y `public/icon.svg`.
+- La foto de la tarjeta de estado cambia según la hora: atardecer (±75 min de salida/puesta del sol),
+  flamencos de día, biguá de noche.
+- En desarrollo, `?t=2026-11-14T19:30-03:00` en la URL simula otra hora.

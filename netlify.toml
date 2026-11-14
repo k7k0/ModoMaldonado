@@ -1,0 +1,25 @@
+# Netlify: build estático con Vite. Los datos ya están generados en el repo
+# (src/data y public/data), así que el build no consulta al SHN.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# El service worker y el index siempre se revalidan para que las actualizaciones lleguen.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+# Archivos con hash en el nombre: cache permanente.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

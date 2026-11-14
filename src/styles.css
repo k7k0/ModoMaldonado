@@ -1,32 +1,39 @@
+/* Paleta tomada de las fotos: agua y cielo nublado (ink), atardecer (accent),
+   cangrejo (crab) y arena (fondo claro). */
 :root {
-  --blue-900: #1f3a8a;
-  --blue-700: #2457c5;
-  --blue-500: #3d6fe0;
-  --blue-100: #e6edfc;
-  --bg: #eef1f6;
-  --card: #ffffff;
-  --text: #15192a;
-  --muted: #6b7280;
-  --line: #e3e7ef;
-  --night: rgba(31, 58, 138, 0.07);
+  --ink-900: #1c2733;
+  --ink-700: #26394b;
+  --water: #3b6f93;
+  --water-soft: #e2ecf2;
+  --accent: #e8913a;
+  --crab: #c0262d;
+  --crab-soft: #ef6b5f;
+  --bg: #f4ede1;
+  --card: #fffcf7;
+  --text: #1d2530;
+  --muted: #706b62;
+  --line: #e7dece;
+  --night: rgba(28, 39, 51, 0.07);
   --moon-dark: #64748b;
   --moon-lit: #f6e7a8;
   --radius: 12px;
-  --shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+  --shadow: 0 1px 3px rgba(60, 45, 20, 0.12);
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --blue-900: #1a2f6e;
-    --blue-700: #2c5bc9;
-    --blue-500: #7aa2ff;
-    --blue-100: #1c2742;
-    --bg: #0e1220;
-    --card: #171c2e;
-    --text: #e8ebf3;
-    --muted: #98a0b3;
-    --line: #262d44;
+    --ink-900: #141d27;
+    --ink-700: #1b2732;
+    --water: #82b3d4;
+    --water-soft: #1f3040;
+    --accent: #f0a24a;
+    --crab-soft: #f07a6e;
+    --bg: #0f151b;
+    --card: #18212a;
+    --text: #ebe6dc;
+    --muted: #9aa3ad;
+    --line: #27323d;
     --night: rgba(0, 0, 0, 0.25);
     --moon-dark: #3a4157;
     --moon-lit: #f3e3a0;
@@ -34,6 +41,7 @@
     color-scheme: dark;
   }
 }
+
 
 * {
   box-sizing: border-box;
@@ -84,9 +92,14 @@ main {
   align-items: center;
   gap: 8px;
   padding: calc(10px + env(safe-area-inset-top, 0px)) 12px 10px 16px;
-  background: var(--blue-700);
+  background: var(--ink-700);
   color: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+.logo {
+  flex: none;
+  color: var(--crab-soft);
 }
 
 .port-btn {
@@ -144,11 +157,36 @@ main {
 
 /* ---------- Estado actual ---------- */
 .status {
-  background: var(--blue-900);
+  position: relative;
+  overflow: hidden;
+  min-height: 230px;
+  display: flex;
+  flex-direction: column;
+  background: var(--ink-900);
   color: #fff;
   border-radius: var(--radius);
   padding: 18px 18px 14px;
   box-shadow: var(--shadow);
+}
+.status-photo {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+}
+.status-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(20, 29, 39, 0.72) 0%,
+    rgba(20, 29, 39, 0.2) 48%,
+    rgba(20, 29, 39, 0.2) 62%,
+    rgba(20, 29, 39, 0.75) 100%
+  );
+}
+.status > :not(.status-photo) {
+  position: relative;
 }
 .status-main {
   display: flex;
@@ -163,7 +201,11 @@ main {
   height: 42px;
   border-radius: 50%;
   background: #fff;
-  color: var(--blue-900);
+  color: var(--ink-900);
+}
+.status-main,
+.status-sun {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 .status-title {
   font-size: 1.2rem;
@@ -183,9 +225,10 @@ main {
 }
 .status-bar > div {
   height: 100%;
-  background: #fff;
+  background: var(--accent);
 }
 .status-sun {
+  margin-top: auto;
   display: flex;
   gap: 18px;
 }
@@ -212,7 +255,7 @@ main {
   color: var(--muted);
 }
 .link-btn {
-  color: var(--blue-500);
+  color: var(--water);
   font-weight: 600;
 }
 
@@ -230,7 +273,7 @@ main {
   overflow: hidden;
 }
 .day.today {
-  box-shadow: inset 4px 0 0 var(--blue-500), var(--shadow);
+  box-shadow: inset 4px 0 0 var(--crab-soft), var(--shadow);
 }
 .day-summary {
   display: flex;
@@ -275,7 +318,7 @@ main {
   min-width: 0;
 }
 .tide svg {
-  color: var(--blue-500);
+  color: var(--water);
 }
 .tide-time {
   font-size: 1.05rem;
@@ -337,16 +380,16 @@ main {
   font-size: 9px;
 }
 .chart .area {
-  fill: color-mix(in srgb, var(--blue-500) 18%, transparent);
+  fill: color-mix(in srgb, var(--water) 18%, transparent);
 }
 .chart .line {
   fill: none;
-  stroke: var(--blue-500);
+  stroke: var(--water);
   stroke-width: 2;
 }
 .chart .dot {
   fill: var(--card);
-  stroke: var(--blue-500);
+  stroke: var(--water);
   stroke-width: 2;
 }
 .chart .label {
@@ -355,7 +398,7 @@ main {
   font-weight: 600;
 }
 .chart .now {
-  stroke: #e0483e;
+  stroke: var(--accent);
   stroke-width: 1.5;
   stroke-dasharray: 3 2;
 }
@@ -431,8 +474,8 @@ main {
   font-weight: 600;
   padding: 2px 7px;
   border-radius: 999px;
-  background: var(--blue-100);
-  color: var(--blue-500);
+  background: var(--water-soft);
+  color: var(--water);
 }
 .badge.secondary {
   background: var(--line);
@@ -472,7 +515,7 @@ main {
   gap: 8px;
   align-items: center;
   padding: calc(10px + env(safe-area-inset-top, 0px)) 8px 10px 12px;
-  background: var(--blue-700);
+  background: var(--ink-700);
   color: #fff;
 }
 .picker-search {
@@ -525,7 +568,7 @@ main {
   border-bottom: 1px solid var(--line);
 }
 .picker-list button.current {
-  background: var(--blue-100);
+  background: var(--water-soft);
 }
 .picker-name {
   display: flex;
