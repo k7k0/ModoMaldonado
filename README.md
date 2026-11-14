@@ -1,5 +1,7 @@
 # Modo Maldonado · Mareas
 
+**https://modomaldonado.netlify.app**
+
 Tablas de marea de los puertos argentinos (patrones y secundarios) a partir de las
 predicciones del Servicio de Hidrografía Naval. La app es estática y funciona sin conexión.
 
@@ -43,6 +45,13 @@ Las descargas se cachean en `scripts/.cache` (borrarla para forzar una nueva des
 - La foto de la tarjeta de estado cambia según la hora: atardecer (±75 min de salida/puesta del sol),
   flamencos de día, biguá de noche.
 - En desarrollo, `?t=2026-11-14T19:30-03:00` en la URL simula otra hora.
+- `public/og-image.jpg` (1200×630) es la vista previa al compartir el link; `apple-touch-icon.png`
+  e `icon-192/512.png` son el ícono en PNG para iOS/Android.
+
+## Publicación
+
+Netlify publica automáticamente cada push a `main` en https://modomaldonado.netlify.app
+(configuración en `netlify.toml`).
 
 ## Licencia
 
