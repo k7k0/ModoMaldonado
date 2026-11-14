@@ -1,3 +1,11 @@
 node_modules
 dist
 scripts/.cache
+
+# Archivos locales del editor / sistema
+.idea/
+*.iml
+.vscode/
+.DS_Store
+*.log
+.env*
