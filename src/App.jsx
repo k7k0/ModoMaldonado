@@ -97,6 +97,8 @@ export default function App() {
   };
 
   const fromDay = day ?? today;
+  // Ignora un pronóstico que todavía corresponde al puerto anterior.
+  const wx = forecast?.portId === port.id && forecast.hours ? forecast : null;
 
   return (
     <div className="app">
@@ -134,31 +136,23 @@ export default function App() {
       </header>
 
       <main>
-        <StatusCard port={port} events={events} now={now} />
+        <StatusCard port={port} events={events} forecast={wx} now={now} />
 
         {day && (
           <div className="viewing">
-            <span>
-              Mostrando desde el {day.split('-').reverse().join('/')}
-            </span>
+            <span>Mostrando desde el {day.split('-').reverse().join('/')}</span>
             <button className="link-btn" onClick={() => setDay(null)}>
               Volver a hoy
             </button>
           </div>
         )}
 
-        <DayList
-          fromDay={fromDay}
-          events={events}
-          forecast={forecast?.portId === port.id && forecast.hours ? forecast : null}
-          port={port}
-          now={now}
-        />
+        <DayList fromDay={fromDay} events={events} forecast={wx} port={port} now={now} />
       </main>
 
       <footer className="footer">
-        Fuente: Tablas de Marea del Servicio de Hidrografía Naval (hidro.gov.ar). Predicciones astronómicas: el viento y la
-        presión pueden modificar la marea real. No apto para navegación. Pronóstico del tiempo:{' '}
+        Fuente: Tablas de Marea del Servicio de Hidrografía Naval (hidro.gov.ar). Predicciones astronómicas: el viento y
+        la presión pueden modificar la marea real. No apto para navegación. Pronóstico del tiempo:{' '}
         <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">
           Open-Meteo
         </a>{' '}

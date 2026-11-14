@@ -1,11 +1,14 @@
 // Service worker: guarda la app y todas las tablas para usarla sin conexión.
-const CACHE = 'mm-v3';
+const CACHE = 'mm-v5';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     (async () => {
       const cache = await caches.open(CACHE);
-      await cache.addAll(['./', 'manifest.webmanifest', 'icon.svg', 'photos/atardecer.webp', 'photos/flamencos.webp', 'photos/bigua.webp', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png']);
+      await cache.addAll(['./', 'manifest.webmanifest', 'icon.svg', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png']);
+      const photos = ['atardecer', 'bigua', 'flamencos', 'espartillar', 'kayaks-playa', 'banco-gaviotas', 'nubes-proa',
+        'muelle-viejo', 'proa-aves', 'maldo-calma', 'muelle-azul', 'kayak-y-barco'];
+      await cache.addAll(photos.map((p) => `photos/${p}.webp`));
       // Precarga de todas las tablas de marea listadas por build-data.
       try {
         const files = await (await fetch('data/files.json', { cache: 'no-cache' })).json();

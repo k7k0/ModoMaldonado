@@ -9,3 +9,6 @@ scripts/.cache
 .DS_Store
 *.log
 .env*
+
+# Fotos originales para procesar (pueden traer GPS); no se suben
+design/nuevas/
