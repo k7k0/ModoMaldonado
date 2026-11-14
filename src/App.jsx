@@ -112,6 +112,11 @@ export default function App() {
       <footer className="footer">
         Fuente: Tablas de Marea del Servicio de Hidrografía Naval (hidro.gov.ar). Predicciones astronómicas: el viento y la
         presión pueden modificar la marea real. No apto para navegación.
+        <br />
+        <a href="https://github.com/k7k0/ModoMaldonado" target="_blank" rel="noopener noreferrer">
+          Código abierto en GitHub
+        </a>{' '}
+        · Licencia MIT
       </footer>
 
       {picking && <PortPicker currentId={portId} pos={pos} onSelect={selectPort} onClose={() => setPicking(false)} />}

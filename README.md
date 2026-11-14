@@ -43,3 +43,10 @@ Las descargas se cachean en `scripts/.cache` (borrarla para forzar una nueva des
 - La foto de la tarjeta de estado cambia según la hora: atardecer (±75 min de salida/puesta del sol),
   flamencos de día, biguá de noche.
 - En desarrollo, `?t=2026-11-14T19:30-03:00` en la URL simula otra hora.
+
+## Licencia
+
+El código se publica bajo licencia [MIT](LICENSE).
+
+Las predicciones de marea son del [Servicio de Hidrografía Naval](https://www.hidro.gov.ar)
+y se redistribuyen sólo como referencia; no son aptas para navegación.
