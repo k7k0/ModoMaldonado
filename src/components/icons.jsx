@@ -9,16 +9,23 @@ const base = {
   'aria-hidden': true,
 };
 
-const wave = (y) => `M3 ${y}c2-1.6 4-1.6 6 0s4 1.6 6 0 4-1.6 6 0`;
-
-/** Olas: 2 líneas para bajamar, 3 para pleamar. */
-export function Waves({ high, size = 30 }) {
-  const ys = high ? [7, 12, 17] : [10, 15];
+/**
+ * Agua que sube hasta el nivel de la marea, sobre una línea de fondo.
+ * level: 0 (seco) a 1 (lleno); ver tideLevelScale.
+ * chop: 0 (planchado) a 1 (ola máxima) según el viento; null = sin pronóstico (ola suave).
+ */
+export function TideLevel({ level, chop = null, size = 30 }) {
+  const top = 5;
+  const bottom = 27;
+  const y = bottom - Math.max(0.04, Math.min(1, level)) * (bottom - top);
+  const a = chop == null ? 2.5 : Math.max(0, Math.min(1, chop)) * 7; // altura del control de la ola
   return (
-    <svg viewBox="0 0 24 24" width={size} height={size} {...base} strokeWidth={1.8}>
-      {ys.map((y) => (
-        <path key={y} d={wave(y)} />
-      ))}
+    <svg viewBox="0 0 24 30" width={size * 0.8} height={size} aria-hidden="true" className="tide-level">
+      <path
+        className="tide-level-water"
+        d={`M2 ${y} q2.5 ${-a} 5 0 t5 0 t5 0 t5 0 V${bottom - 2} q0 2 -2 2 H4 q-2 0 -2 -2Z`}
+      />
+      <path className="tide-level-bed" d={`M1 ${bottom + 0.5}H23`} />
     </svg>
   );
 }
@@ -71,6 +78,24 @@ export const Pin = () => (
   <svg viewBox="0 0 24 24" width="18" height="18" {...base}>
     <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
     <circle cx="12" cy="9.5" r="2.5" />
+  </svg>
+);
+
+export const Wind = () => (
+  <svg viewBox="0 0 24 24" width="15" height="15" {...base}>
+    <path d="M3 8h10a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h7" />
+  </svg>
+);
+
+export const Thermo = () => (
+  <svg viewBox="0 0 24 24" width="15" height="15" {...base}>
+    <path d="M14 14.8V5a2 2 0 0 0-4 0v9.8a4 4 0 1 0 4 0z" />
+  </svg>
+);
+
+export const Drop = () => (
+  <svg viewBox="0 0 24 24" width="15" height="15" {...base}>
+    <path d="M12 3s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z" />
   </svg>
 );
 

@@ -1,9 +1,11 @@
 import { curve } from '../lib/tides.js';
 import { DAY, HOUR, fmtTime } from '../lib/time.js';
 
-const W = 340;
+export const CHART_W = 340;
+export const CHART_PAD = { l: 30, r: 8, t: 18, b: 22 };
+const W = CHART_W;
 const H = 150;
-const PAD = { l: 30, r: 8, t: 18, b: 22 };
+const PAD = CHART_PAD;
 
 /** Curva de marea de un día (00 a 24 h), con noche sombreada y marcador de "ahora". */
 export default function TideChart({ events, dayEvents, start, sun, now }) {

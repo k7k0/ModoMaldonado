@@ -16,6 +16,15 @@
   --night: rgba(28, 39, 51, 0.07);
   --moon-dark: #64748b;
   --moon-lit: #f6e7a8;
+  --wind-0: #dbeaf3;
+  --wind-1: #b5e3c4;
+  --wind-2: #f3e58a;
+  --wind-3: #f6b35c;
+  --wind-4: #ee7a55;
+  --wind-5: #d9475f;
+  --wind-text: #1d2530;
+  --staff: #f7ecd7;
+  --staff-ink: #2a2f38;
   --radius: 12px;
   --shadow: 0 1px 3px rgba(60, 45, 20, 0.12);
   color-scheme: light;
@@ -37,6 +46,14 @@
     --night: rgba(0, 0, 0, 0.25);
     --moon-dark: #3a4157;
     --moon-lit: #f3e3a0;
+    --wind-0: #2b4255;
+    --wind-1: #2f6b4a;
+    --wind-2: #8a7a25;
+    --wind-3: #9c5f22;
+    --wind-4: #a5432c;
+    --wind-5: #9e2942;
+    --wind-text: #f1ede6;
+    --staff: #e9dcc0;
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     color-scheme: dark;
   }
@@ -329,6 +346,41 @@ main {
   color: var(--muted);
   margin-bottom: 4px;
 }
+.day-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.day-wx {
+  display: flex;
+  justify-content: space-around;
+  gap: 8px;
+  padding: 6px 8px 8px;
+  border-top: 1px solid var(--line);
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.day-wx span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.day-wx small {
+  font-size: 0.72rem;
+}
+.day-wx .wet {
+  color: var(--water);
+  font-weight: 600;
+}
+.wx-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
 .day-tides {
   flex: 1;
   display: flex;
@@ -345,6 +397,19 @@ main {
 }
 .tide svg {
   color: var(--water);
+  margin-bottom: 3px;
+}
+.tide-level-water {
+  fill: var(--water);
+}
+.tide-level-bed {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0.6;
+}
+.tide.lo .tide-level-water {
+  fill: color-mix(in srgb, var(--water) 55%, transparent);
 }
 .tide-time {
   font-size: 1.05rem;
@@ -427,6 +492,65 @@ main {
   stroke: var(--accent);
   stroke-width: 1.5;
   stroke-dasharray: 3 2;
+}
+
+/* Franja de pronóstico alineada con el gráfico */
+.wx {
+  position: relative;
+  margin: -2px 0 6px;
+  font-variant-numeric: tabular-nums;
+}
+.wx-labels {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 8.8%;
+  display: grid;
+  grid-auto-rows: 22px;
+  align-items: center;
+  font-size: 0.62rem;
+  color: var(--muted);
+}
+.wx-grid {
+  display: grid;
+}
+.wx-col {
+  display: grid;
+  grid-auto-rows: 22px;
+  align-items: center;
+  justify-items: center;
+  font-size: 0.78rem;
+}
+.wx-wind {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding: 1px 4px 1px 2px;
+  border-radius: 6px;
+  color: var(--wind-text);
+  font-weight: 700;
+  font-size: 0.76rem;
+}
+.wx-gust {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+.wx-rain {
+  color: var(--muted);
+}
+.wx-rain.wet {
+  color: var(--water);
+  font-weight: 700;
+}
+.wx-source {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: right;
+}
+.wx-source a,
+.footer a {
+  color: var(--water);
 }
 
 .detail-table {

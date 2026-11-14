@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { dataRange, groupByDay } from '../lib/tides.js';
+import { dataRange, groupByDay, tideLevelScale } from '../lib/tides.js';
+import { forecastByDay } from '../lib/weather.js';
 import { addDays, dayKey } from '../lib/time.js';
 import DayRow from './DayRow.jsx';
 
 const PAGE = 14;
 
 /** Lista de días desde `fromDay`, con carga progresiva al scrollear. */
-export default function DayList({ fromDay, events, port, now }) {
+export default function DayList({ fromDay, events, forecast, port, now }) {
   const [count, setCount] = useState(PAGE);
   const [openDay, setOpenDay] = useState(null);
   const sentinel = useRef(null);
   const byDay = useMemo(() => (events ? groupByDay(events) : new Map()), [events]);
+  const levelOf = useMemo(() => tideLevelScale(events ?? []), [events]);
+  const wxByDay = useMemo(() => forecastByDay(forecast), [forecast]);
 
   useEffect(() => {
     setCount(PAGE);
@@ -50,6 +53,9 @@ export default function DayList({ fromDay, events, port, now }) {
           label={k === today ? 'Hoy' : k === tomorrow ? 'Mañana' : null}
           dayEvents={byDay.get(k) ?? []}
           events={events}
+          levelOf={levelOf}
+          wxHours={wxByDay.get(k)}
+          wxFetchedAt={forecast?.fetchedAt}
           port={port}
           open={openDay === k}
           onToggle={toggle}

@@ -118,6 +118,21 @@ export function curve(events, from, to, step = 10 * MIN) {
   return pts;
 }
 
+/**
+ * Nivel de llenado (0..1) para el ícono de cada marea. Pleamares y bajamares tienen rangos
+ * separados para que se note la diferencia entre mareas vivas y muertas:
+ * bajamares de 0.08 a 0.45 y pleamares de 0.55 a 1, cada una según su mínimo/máximo anual.
+ */
+export function tideLevelScale(events) {
+  const range = (hs) => (hs.length ? [Math.min(...hs), Math.max(...hs)] : [0, 1]);
+  const hi = range(events.filter((e) => e.high).map((e) => e.h));
+  const lo = range(events.filter((e) => !e.high).map((e) => e.h));
+  const map = ([min, max], from, to) => (h) => from + ((h - min) / (max - min || 1)) * (to - from);
+  const fHi = map(hi, 0.55, 1);
+  const fLo = map(lo, 0.08, 0.45);
+  return (e) => (e.high ? fHi(e.h) : fLo(e.h));
+}
+
 /** Amplitud del día: diferencia entre la mayor pleamar y la menor bajamar. */
 export function dayRange(dayEvents) {
   const highs = dayEvents.filter((e) => e.high).map((e) => e.h);

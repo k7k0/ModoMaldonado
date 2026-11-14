@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { dataRange, loadEvents, portById, ports } from './lib/tides.js';
 import { distanceKm, getPosition, nearestPort } from './lib/geo.js';
 import { dayKey } from './lib/time.js';
+import { loadForecast } from './lib/weather.js';
 import { useNow, useStoredState } from './hooks.js';
 import StatusCard from './components/StatusCard.jsx';
 import DayList from './components/DayList.jsx';
@@ -25,11 +26,22 @@ export default function App() {
   const [day, setDay] = useState(null); // null = hoy
   const [pos, setPos] = useState(null);
   const [events, setEvents] = useState(null);
+  const [forecast, setForecast] = useState(null);
   const [picking, setPicking] = useState(false);
   const [locating, setLocating] = useState(false);
   const [toast, setToast] = useState(null);
   const dateInput = useRef(null);
   const port = portById.get(portId);
+
+  // Pronóstico (online, opcional): se refresca al cambiar de puerto y al volver a la app.
+  const hour = Math.floor(now / 3600000);
+  useEffect(() => {
+    let alive = true;
+    loadForecast(port.lat, port.lon).then((f) => alive && setForecast({ portId: port.id, ...f }));
+    return () => {
+      alive = false;
+    };
+  }, [port, hour]);
 
   useEffect(() => {
     if (!toast) return;
@@ -135,12 +147,22 @@ export default function App() {
           </div>
         )}
 
-        <DayList fromDay={fromDay} events={events} port={port} now={now} />
+        <DayList
+          fromDay={fromDay}
+          events={events}
+          forecast={forecast?.portId === port.id && forecast.hours ? forecast : null}
+          port={port}
+          now={now}
+        />
       </main>
 
       <footer className="footer">
         Fuente: Tablas de Marea del Servicio de Hidrografía Naval (hidro.gov.ar). Predicciones astronómicas: el viento y la
-        presión pueden modificar la marea real. No apto para navegación.
+        presión pueden modificar la marea real. No apto para navegación. Pronóstico del tiempo:{' '}
+        <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">
+          Open-Meteo
+        </a>{' '}
+        (CC BY 4.0).
         <br />
         <a href="https://github.com/k7k0/ModoMaldonado" target="_blank" rel="noopener noreferrer">
           Código abierto en GitHub

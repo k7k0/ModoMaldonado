@@ -37,6 +37,10 @@ Las descargas se cachean en `scripts/.cache` (borrarla para forzar una nueva des
   pleamar (hora) o cero (altura) y el puerto se marca como aproximado.
 - **Altura actual / curva:** interpolación cosenoidal entre mareas consecutivas.
 - **Sol y luna:** calculados localmente (algoritmo NOAA y mes sinódico medio).
+- **Pronóstico del tiempo** (viento en km/h, ráfagas, temperatura, lluvia): [Open-Meteo](https://open-meteo.com),
+  CC BY 4.0. Es lo único que se consulta online; se guarda en el navegador y se refresca cada hora.
+  Sin conexión se muestra el último pronóstico (hasta 3 días). Los spots de Windguru por puerto se
+  configuran en `WINDGURU_SPOTS` (`src/lib/weather.js`).
 
 ## Diseño
 

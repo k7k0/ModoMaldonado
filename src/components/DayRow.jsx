@@ -2,16 +2,19 @@ import { memo } from 'react';
 import { moonPhase, sunTimes, tideKind } from '../lib/astro.js';
 import { dayRange } from '../lib/tides.js';
 import { DAY, HOUR, MONTHS, WEEKDAYS, WEEKDAYS_LONG, arParts, dayStart, fmtTime } from '../lib/time.js';
-import { Moon, Sunrise, Sunset, Waves } from './icons.jsx';
+import { ATTRIBUTION, chopFromWind, daySummary, windAt, windColor, windguruUrl } from '../lib/weather.js';
+import { Drop, Moon, Sunrise, Sunset, Thermo, TideLevel, Wind } from './icons.jsx';
 import TideChart from './TideChart.jsx';
+import WeatherStrip from './WeatherStrip.jsx';
 import PortInfo from './PortInfo.jsx';
 
 /** Fila de un día: mareas resumidas; al tocarla muestra el detalle. */
-function DayRow({ dayKey, label, dayEvents, events, port, open, onToggle, now }) {
+function DayRow({ dayKey, label, dayEvents, events, levelOf, wxHours, wxFetchedAt, port, open, onToggle, now }) {
   const start = dayStart(dayKey);
   const p = arParts(start);
   const moon = moonPhase(start + 12 * HOUR);
   const isToday = now >= start && now < start + DAY;
+  const wx = daySummary(wxHours);
 
   return (
     <article className={`day${isToday ? ' today' : ''}${open ? ' open' : ''}`}>
@@ -22,26 +25,65 @@ function DayRow({ dayKey, label, dayEvents, events, port, open, onToggle, now })
           <span className="day-month">{p.m}</span>
           <Moon age={moon.age} size={22} />
         </div>
-        <div className="day-tides">
-          {dayEvents.length ? (
-            dayEvents.map((e) => (
-              <div key={e.t} className={`tide ${e.high ? 'hi' : 'lo'}`}>
-                <Waves high={e.high} />
-                <span className="tide-time">{fmtTime(e.t)}</span>
-                <span className="tide-h">{e.h.toFixed(2)}m</span>
-              </div>
-            ))
-          ) : (
-            <span className="muted">Sin datos</span>
-          )}
+        <div className="day-main">
+          <div className="day-tides">
+            {dayEvents.length ? (
+              dayEvents.map((e) => {
+                const wind = windAt(wxHours, e.t);
+                return (
+                  <div
+                    key={e.t}
+                    className={`tide ${e.high ? 'hi' : 'lo'}`}
+                    title={`${e.high ? 'Pleamar' : 'Bajamar'} de ${e.h.toFixed(2)} m${wind != null ? ` · viento ${Math.round(wind)} km/h` : ''}`}
+                  >
+                    <TideLevel level={levelOf(e)} chop={chopFromWind(wind)} />
+                    <span className="tide-time">{fmtTime(e.t)}</span>
+                    <span className="tide-h">{e.h.toFixed(2)}m</span>
+                  </div>
+                );
+              })
+            ) : (
+              <span className="muted">Sin datos</span>
+            )}
+          </div>
+          {wx && <WeatherSummary wx={wx} />}
         </div>
       </button>
-      {open && <DayDetail {...{ dayKey, start, p, moon, dayEvents, events, port, now }} />}
+      {open && <DayDetail {...{ dayKey, start, p, moon, dayEvents, events, wxHours, wxFetchedAt, port, now }} />}
     </article>
   );
 }
 
-function DayDetail({ dayKey, start, p, moon, dayEvents, events, port, now }) {
+/** Línea compacta de pronóstico: viento máx. (ráfaga), temperatura mín/máx, lluvia. */
+function WeatherSummary({ wx }) {
+  return (
+    <div className="day-wx">
+      <span title="Viento máximo y ráfaga máxima del día">
+        <Wind />
+        <b style={{ background: windColor(wx.windMax) }} className="wx-dot" />
+        {Math.round(wx.windMax)} km/h
+        <small>ráf. {Math.round(wx.gustMax)}</small>
+      </span>
+      <span>
+        <Thermo />
+        {Math.round(wx.tempMin)}° / {Math.round(wx.tempMax)}°
+      </span>
+      <span className={wx.rain >= 0.1 ? 'wet' : 'dry'}>
+        <Drop />
+        {wx.rain >= 0.1 ? `${wx.rain < 10 ? wx.rain.toFixed(1) : Math.round(wx.rain)} mm` : `${wx.rainProb}%`}
+      </span>
+    </div>
+  );
+}
+
+function fmtAgo(ms) {
+  const min = Math.round(ms / 60000);
+  if (min < 60) return `hace ${Math.max(1, min)} min`;
+  const h = Math.round(min / 60);
+  return h < 48 ? `hace ${h} h` : `hace ${Math.round(h / 24)} días`;
+}
+
+function DayDetail({ dayKey, start, p, moon, dayEvents, events, wxHours, wxFetchedAt, port, now }) {
   const sun = sunTimes(dayKey, port.lat, port.lon);
   const range = dayRange(dayEvents);
   const kind = tideKind(moon.age);
@@ -53,6 +95,21 @@ function DayDetail({ dayKey, start, p, moon, dayEvents, events, port, now }) {
       </h3>
 
       <TideChart {...{ events, dayEvents, start, sun, now }} />
+      {wxHours?.length ? (
+        <>
+          <WeatherStrip hours={wxHours} start={start} />
+          <p className="wx-source">
+            Pronóstico{' '}
+            <a href={ATTRIBUTION.url} target="_blank" rel="noopener noreferrer">
+              {ATTRIBUTION.name}
+            </a>
+            {wxFetchedAt && ` · actualizado ${fmtAgo(Date.now() - wxFetchedAt)}`} ·{' '}
+            <a href={windguruUrl(port)} target="_blank" rel="noopener noreferrer">
+              Ver en Windguru ↗
+            </a>
+          </p>
+        </>
+      ) : null}
 
       <table className="detail-table">
         <thead>
