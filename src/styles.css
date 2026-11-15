@@ -138,7 +138,8 @@ main {
   padding: 2px 0;
 }
 .port-name {
-  font-size: 1.3rem;
+  /* Achica la letra en pantallas angostas para que entre el nombre completo. */
+  font-size: clamp(1rem, 3.6vw + 0.2rem, 1.3rem);
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -427,9 +428,10 @@ main {
 }
 .day-wx {
   display: flex;
+  flex-wrap: wrap; /* en pantallas angostas pasa a dos renglones en vez de cortarse */
   justify-content: space-around;
-  gap: 8px;
-  padding: 6px 8px 8px;
+  gap: 2px 10px;
+  padding: 6px 6px 8px;
   border-top: 1px solid var(--line);
   font-size: 0.8rem;
   color: var(--muted);
@@ -852,4 +854,37 @@ main {
 }
 .picker-empty {
   padding: 24px 16px;
+}
+
+/* ---------- Pantallas angostas (iPhone SE/mini y Android chicos) ---------- */
+@media (max-width: 400px) {
+  .topbar {
+    gap: 4px;
+    padding-left: 12px;
+    padding-right: 6px;
+  }
+  .topbar .icon-btn {
+    width: 36px;
+    height: 36px;
+  }
+  .logo {
+    width: 28px;
+    height: auto;
+  }
+  .day-wx {
+    font-size: 0.76rem;
+  }
+}
+@media (max-width: 360px) {
+  .wx-col {
+    font-size: 0.7rem;
+  }
+  .wx-wind {
+    font-size: 0.68rem;
+    padding: 1px 2px 1px 1px;
+  }
+  .wx-wind svg {
+    width: 10px;
+    height: 10px;
+  }
 }
