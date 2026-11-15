@@ -75,8 +75,18 @@ pestaña Actions.
 
 ## Publicación
 
-Netlify publica automáticamente cada push a `main` en https://modomaldonado.netlify.app
+Netlify publica automáticamente cada cambio que entra a `main` en https://modomaldonado.netlify.app
 (configuración en `netlify.toml`).
+
+`main` está protegida: los cambios van por pull request y sólo se pueden mergear cuando el
+deploy preview de Netlify terminó bien. Netlify comenta en el PR el link al preview para
+probarlo (por ejemplo, desde el celular) antes de publicarlo.
+
+```sh
+git checkout -b mi-cambio
+git push -u origin mi-cambio
+gh pr create --fill
+```
 
 ## Licencia
 
