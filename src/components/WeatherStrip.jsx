@@ -20,14 +20,15 @@ export default function WeatherStrip({ hours, start, sun }) {
     // Viento: la hora más ventosa del bloque (coincide con el máximo del resumen del día).
     const windiest = hs.reduce((a, h) => (h.wind > a.wind ? h : a));
     const mid = hs[Math.floor(hs.length / 2)];
+    const gusts = hs.map((h) => h.gust).filter((g) => g != null);
     const midT = from + (BLOCK / 2) * HOUR;
     blocks.push({
       sky: skyKind(hs),
       night: sun.sunrise ? midT < sun.sunrise || midT > sun.sunset : false,
       wind: Math.round(windiest.wind),
-      gust: Math.round(Math.max(...hs.map((h) => h.gust))),
+      gust: gusts.length ? Math.round(Math.max(...gusts)) : '–',
       dir: windiest.dir,
-      temp: Math.round(mid.temp),
+      temp: mid.temp == null ? '–' : Math.round(mid.temp),
       rain: hs.reduce((s, h) => s + (h.rain || 0), 0),
     });
   }
@@ -66,7 +67,7 @@ export default function WeatherStrip({ hours, start, sun }) {
                 {b.wind}
               </span>
               <span className="wx-gust">{b.gust}</span>
-              <span className="wx-temp">{b.temp}°</span>
+              <span className="wx-temp">{b.temp === '–' ? '–' : `${b.temp}°`}</span>
               <span className={`wx-rain${b.rain >= 0.1 ? ' wet' : ''}`}>{b.rain >= 0.1 ? b.rain.toFixed(1) : '·'}</span>
             </div>
           ) : (

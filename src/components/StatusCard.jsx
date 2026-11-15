@@ -1,4 +1,4 @@
-import { tideState } from '../lib/tides.js';
+import { dataRange, tideState } from '../lib/tides.js';
 import { sunTimes } from '../lib/astro.js';
 import { arParts, dayKey, fmtDuration, fmtTime } from '../lib/time.js';
 import { ArrowDown, ArrowUp, Sunrise, Sunset } from './icons.jsx';
@@ -21,11 +21,22 @@ const PHOTOS = [
 
 const photoFor = (now) => PHOTOS[Math.floor(arParts(now).hh / 2)];
 
+/** Título y aclaración cuando no se puede mostrar el estado de la marea. */
+function noState(events, offline, now) {
+  if (offline) return ['Sin conexión', 'La tabla de este puerto todavía no está guardada. Se carga cuando vuelva la señal.'];
+  if (!events) return ['Cargando…', null];
+  const year = +dataRange.last.slice(0, 4);
+  if (events.length && now > events.at(-1).t)
+    return [`Fin de las tablas ${year}`, `Las de ${year + 1} se agregan cuando el SHN las publique.`];
+  return ['Sin datos de marea para hoy', null];
+}
+
 /** Estado actual de la marea (arriba de todo). */
-export default function StatusCard({ port, events, now }) {
+export default function StatusCard({ port, events, offline, now }) {
   const state = events && tideState(events, now);
   const sun = sunTimes(dayKey(now), port.lat, port.lon);
   const bg = photoFor(now);
+  const [title, sub] = state ? [] : noState(events, offline, now);
 
   return (
     <section className="status">
@@ -48,7 +59,10 @@ export default function StatusCard({ port, events, now }) {
         </div>
       ) : (
         <div className="status-main">
-          <div className="status-title">{events ? 'Sin datos de marea para hoy' : 'Cargando…'}</div>
+          <div>
+            <div className="status-title">{title}</div>
+            {sub && <div className="status-sub">{sub}</div>}
+          </div>
         </div>
       )}
       {state && (

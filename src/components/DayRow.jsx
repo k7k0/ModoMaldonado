@@ -76,6 +76,8 @@ function DayRow({ dayKey, label, dayEvents, events, levelOf, wxHours, wxFetchedA
   );
 }
 
+const round = (v) => (v == null ? '–' : Math.round(v));
+
 /** Línea compacta de pronóstico: viento máx. (ráfaga), cielo y temperatura mín/máx, lluvia. */
 function WeatherSummary({ wx, sky }) {
   return (
@@ -84,11 +86,11 @@ function WeatherSummary({ wx, sky }) {
         <Wind />
         <b style={{ background: windColor(wx.windMax) }} className="wx-dot" />
         {Math.round(wx.windMax)} km/h
-        <small>ráf. {Math.round(wx.gustMax)}</small>
+        <small>ráf. {round(wx.gustMax)}</small>
       </span>
       <span title={sky ? SKY_LABELS[sky] : undefined}>
         {sky ? <Sky kind={sky} size={18} /> : <Thermo />}
-        {Math.round(wx.tempMin)}° / {Math.round(wx.tempMax)}°
+        {round(wx.tempMin)}° / {round(wx.tempMax)}°
       </span>
       <span className={wx.rain >= 0.1 ? 'wet' : 'dry'}>
         <Drop />

@@ -7,7 +7,7 @@ import DayRow from './DayRow.jsx';
 const PAGE = 14;
 
 /** Lista de días desde `fromDay`, con carga progresiva al scrollear. */
-export default function DayList({ fromDay, events, forecast, port, now }) {
+export default function DayList({ fromDay, pickedDay, events, offline, forecast, port, now }) {
   const [count, setCount] = useState(PAGE);
   const [openDay, setOpenDay] = useState(null);
   const sentinel = useRef(null);
@@ -15,10 +15,11 @@ export default function DayList({ fromDay, events, forecast, port, now }) {
   const levelOf = useMemo(() => tideLevelScale(events ?? []), [events]);
   const wxByDay = useMemo(() => forecastByDay(forecast), [forecast]);
 
+  // Sólo al elegir otra fecha o puerto: a medianoche la lista sigue como estaba.
   useEffect(() => {
     setCount(PAGE);
     setOpenDay(null);
-  }, [fromDay, port.id]);
+  }, [pickedDay, port.id]);
 
   const days = useMemo(() => {
     const out = [];
@@ -40,9 +41,20 @@ export default function DayList({ fromDay, events, forecast, port, now }) {
   const today = dayKey(now);
   const tomorrow = addDays(today, 1);
 
+  if (offline)
+    return (
+      <p className="muted center">
+        Sin conexión y sin copia guardada de este puerto. Las mareas aparecen apenas vuelva la señal.
+      </p>
+    );
   if (!events) return <p className="muted center">Cargando mareas…</p>;
-  if (fromDay < dataRange.first || fromDay > dataRange.last)
-    return <p className="muted center">No hay tablas del SHN cargadas para esa fecha.</p>;
+  if (fromDay > dataRange.last)
+    return (
+      <p className="muted center">
+        Todavía no hay tablas del SHN para {fromDay.slice(0, 4)}. Se agregan cuando el SHN las publique.
+      </p>
+    );
+  if (fromDay < dataRange.first) return <p className="muted center">No hay tablas del SHN cargadas para esa fecha.</p>;
 
   return (
     <div className="days">

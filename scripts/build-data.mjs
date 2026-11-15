@@ -5,6 +5,7 @@
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { ROOT, norm, titleCase } from './shn.mjs';
+import { DEFAULT_PORT, WINDGURU_SPOTS } from '../src/config.js';
 
 const OUT = path.join(ROOT, 'scripts', 'out');
 
@@ -32,20 +33,30 @@ function splitName(raw) {
   return { name, area: parts.length ? titleCase(parts.join(' - ')) : null };
 }
 
-const primaries = latest.ports.map((p) => ({
-  id: p.code,
-  ...splitName(p.name),
-  type: 'primary',
-  lat: p.lat,
-  lon: p.lon,
-  charts: p.charts,
-  regime: p.regime,
-  est: p.est,
-  meanLevel: p.meanLevel,
-  stats: p.stats,
-}));
-
 const byName = new Map(latest.ports.map((p) => [norm(p.name), p.code]));
+const byCode = new Map(latest.ports.map((p) => [p.code, p]));
+
+const primaries = latest.ports.map((p) => {
+  // Sin posición propia (canales calculados sobre otro puerto): se usa la del puerto base.
+  const base = p.lat == null && p.basedOn ? byCode.get(byName.get(norm(p.basedOn))) : null;
+  const lat = p.lat ?? base?.lat;
+  const lon = p.lon ?? base?.lon;
+  if (lat == null || lon == null) throw new Error(`${p.code} (${p.name}) sin posición`);
+  return {
+    id: p.code,
+    ...splitName(p.name),
+    type: 'primary',
+    lat,
+    lon,
+    posFrom: base?.code ?? null,
+    charts: p.charts,
+    regime: p.regime,
+    est: p.est,
+    meanLevel: p.meanLevel,
+    stats: p.stats,
+  };
+});
+
 const secondaries = [];
 const skipped = [];
 for (const s of secondary) {
@@ -86,6 +97,18 @@ const catalog = {
   generatedAt: new Date().toISOString(),
   ports: [...primaries, ...secondaries].sort((a, b) => a.name.localeCompare(b.name, 'es')),
 };
+
+// Los ids salen de los nombres del SHN: si un año cambia un nombre, el puerto por defecto o un
+// spot de Windguru quedarían apuntando a la nada. Se frena antes de escribir nada.
+const ids = new Set(catalog.ports.map((p) => p.id));
+const missing = [DEFAULT_PORT, ...Object.keys(WINDGURU_SPOTS)].filter((id) => !ids.has(id));
+if (missing.length) {
+  throw new Error(
+    `Puertos de src/config.js que no están en los datos: ${[...new Set(missing)].join(', ')}.\n` +
+      'Revisar si el SHN cambió el nombre (RENAMES en scrape-secondary.mjs) y actualizar src/config.js.',
+  );
+}
+
 await mkdir(path.join(ROOT, 'src', 'data'), { recursive: true });
 await writeFile(path.join(ROOT, 'src', 'data', 'ports.json'), JSON.stringify(catalog));
 

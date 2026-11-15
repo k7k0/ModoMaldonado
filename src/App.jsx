@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { dataRange, loadEvents, portById, ports } from './lib/tides.js';
+import { OfflineError, dataRange, loadEvents, portById, ports } from './lib/tides.js';
 import { distanceKm, getPosition, nearestPort } from './lib/geo.js';
 import { dayKey } from './lib/time.js';
 import { loadForecast } from './lib/weather.js';
-import { useNow, useStoredState } from './hooks.js';
+import { useNow, useRetryTick, useStoredState } from './hooks.js';
 import StatusCard from './components/StatusCard.jsx';
 import DayList from './components/DayList.jsx';
 import PortPicker from './components/PortPicker.jsx';
 import { Calendar, ChevronDown, Locate } from './components/icons.jsx';
 import Logo from './components/Logo.jsx';
+import InstallHint from './components/InstallHint.jsx';
+import { DEFAULT_PORT as CONFIG_DEFAULT_PORT } from './config.js';
 
-const DEFAULT_PORT = 'S-RINCON-DE-BAHIA-BLANCA-PUERTO-CUATREROS-MALDO'; // Puerto Cuatreros (Maldo)
+// Si el puerto por defecto dejara de existir en los datos, se usa el primero de la lista.
+const DEFAULT_PORT = portById.has(CONFIG_DEFAULT_PORT) ? CONFIG_DEFAULT_PORT : ports[0].id;
 
 const LOCATE_ERRORS = {
   denied: 'Permiso de ubicación denegado. Podés habilitarlo en la configuración del navegador.',
@@ -26,6 +29,8 @@ export default function App() {
   const [day, setDay] = useState(null); // null = hoy
   const [pos, setPos] = useState(null);
   const [events, setEvents] = useState(null);
+  const [tidesOffline, setTidesOffline] = useState(false);
+  const [tidesReload, setTidesReload] = useState(0);
   const [forecast, setForecast] = useState(null);
   const [picking, setPicking] = useState(false);
   const [locating, setLocating] = useState(false);
@@ -33,15 +38,17 @@ export default function App() {
   const dateInput = useRef(null);
   const port = portById.get(portId);
 
-  // Pronóstico (online, opcional): se refresca al cambiar de puerto y al volver a la app.
+  // Pronóstico (online, opcional): se refresca al cambiar de puerto, cada hora y al volver
+  // la conexión o la app (si el guardado es reciente no se vuelve a consultar).
   const hour = Math.floor(now / 3600000);
+  const retry = useRetryTick();
   useEffect(() => {
     let alive = true;
     loadForecast(port.lat, port.lon).then((f) => alive && setForecast({ portId: port.id, ...f }));
     return () => {
       alive = false;
     };
-  }, [port, hour]);
+  }, [port, hour, retry]);
 
   useEffect(() => {
     if (!toast) return;
@@ -52,11 +59,26 @@ export default function App() {
   useEffect(() => {
     let alive = true;
     setEvents(null);
-    loadEvents(port).then((ev) => alive && setEvents(ev));
+    loadEvents(port).then(
+      (ev) => {
+        if (!alive) return;
+        setEvents(ev);
+        setTidesOffline(false);
+      },
+      (err) => {
+        if (!alive) return;
+        setTidesOffline(err instanceof OfflineError);
+        setEvents(err instanceof OfflineError ? null : []);
+      },
+    );
     return () => {
       alive = false;
     };
-  }, [port]);
+  }, [port, tidesReload]);
+  // Tabla que no se pudo bajar por falta de señal: se reintenta al volver la conexión.
+  useEffect(() => {
+    if (tidesOffline) setTidesReload((n) => n + 1);
+  }, [retry]);
 
   const selectPort = useCallback(
     (id) => {
@@ -136,7 +158,9 @@ export default function App() {
       </header>
 
       <main>
-        <StatusCard port={port} events={events} now={now} />
+        <StatusCard port={port} events={events} offline={tidesOffline} now={now} />
+
+        <InstallHint />
 
         {day && (
           <div className="viewing">
@@ -147,7 +171,15 @@ export default function App() {
           </div>
         )}
 
-        <DayList fromDay={fromDay} events={events} forecast={wx} port={port} now={now} />
+        <DayList
+          fromDay={fromDay}
+          pickedDay={day}
+          events={events}
+          offline={tidesOffline}
+          forecast={wx}
+          port={port}
+          now={now}
+        />
       </main>
 
       <footer className="footer">

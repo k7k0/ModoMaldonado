@@ -1,6 +1,7 @@
 // Pronóstico horario de Open-Meteo (gratuito, sin clave, CC BY 4.0).
 // Es lo único que la app consulta online: si no hay conexión se usa el último guardado.
 import { HOUR, dayKey } from './time.js';
+import { WINDGURU_SPOTS } from '../config.js';
 
 const API = 'https://api.open-meteo.com/v1/forecast';
 const FRESH_MS = HOUR; // no se vuelve a consultar antes de esto
@@ -9,19 +10,14 @@ const TIMEOUT_MS = 8000; // con mala señal no se espera más que esto
 
 export const ATTRIBUTION = { name: 'Open-Meteo', url: 'https://open-meteo.com/' };
 
-/** Spots de Windguru por puerto (id de la URL windguru.cz/<id>). */
-const WINDGURU_SPOTS = {
-  'S-RINCON-DE-BAHIA-BLANCA-PUERTO-CUATREROS-MALDO': 329647,
-  'S-RINCON-DE-BAHIA-BLANCA-PUERTO-GALVAN': 329647,
-  IWHI: 329647,
-};
-
 export function windguruUrl(port) {
   const spot = WINDGURU_SPOTS[port.id];
   return spot ? `https://www.windguru.cz/${spot}` : 'https://www.windguru.cz/';
 }
 
-const cacheKey = (lat, lon) => `mm.wx4.${lat.toFixed(2)},${lon.toFixed(2)}`;
+const CACHE_PREFIX = 'mm.wx5.';
+const CACHE_KEEP = 8; // pronósticos guardados como máximo (los puertos más recientes)
+const cacheKey = (lat, lon) => `${CACHE_PREFIX}${lat.toFixed(2)},${lon.toFixed(2)}`;
 
 // Viento, ráfagas y temperatura de GFS: el modelo que Windguru muestra por defecto
 // (la mezcla por defecto de Open-Meteo da ráfagas mucho más altas).
@@ -45,8 +41,16 @@ function readCache(key) {
   }
 }
 
+/** Guarda el pronóstico y borra los de versiones anteriores y los más viejos. */
 function writeCache(key, value) {
   try {
+    const keys = Object.keys(localStorage).filter((k) => k.startsWith('mm.wx'));
+    for (const k of keys) if (!k.startsWith(CACHE_PREFIX)) localStorage.removeItem(k);
+    const others = keys
+      .filter((k) => k.startsWith(CACHE_PREFIX) && k !== key)
+      .map((k) => [k, readCache(k)?.fetchedAt ?? 0])
+      .sort((a, b) => b[1] - a[1]);
+    for (const [k] of others.slice(CACHE_KEEP - 1)) localStorage.removeItem(k);
     localStorage.setItem(key, JSON.stringify(value));
   } catch {}
 }
@@ -56,6 +60,7 @@ function writeCache(key, value) {
  * Devuelve el guardado si es reciente; si falla la red, el guardado aunque sea viejo (o null).
  */
 export async function loadForecast(lat, lon) {
+  if (lat == null || lon == null) return null;
   const key = cacheKey(lat, lon);
   const cached = readCache(key);
   if (cached && Date.now() - cached.fetchedAt < FRESH_MS) return cached;
@@ -67,6 +72,8 @@ export async function loadForecast(lat, lon) {
     latitude: lat.toFixed(3),
     longitude: lon.toFixed(3),
     timeformat: 'unixtime',
+    // Días de 00 a 24 h argentinas (si no, el primero y el último quedan por la mitad).
+    timezone: 'America/Argentina/Buenos_Aires',
     forecast_days: '16',
   };
   const main = new URLSearchParams({
@@ -126,8 +133,10 @@ export function forecastByDay(forecast) {
 /** Resumen diario: viento máx., ráfaga máx., temp. mín/máx. y lluvia total. */
 export function daySummary(hours) {
   if (!hours?.length) return null;
-  const max = (f) => Math.max(...hours.map(f));
-  const min = (f) => Math.min(...hours.map(f));
+  // Ignora horas sin dato (si no, Math.min/max las toman como 0).
+  const vals = (f) => hours.map(f).filter((v) => v != null);
+  const max = (f) => (vals(f).length ? Math.max(...vals(f)) : null);
+  const min = (f) => (vals(f).length ? Math.min(...vals(f)) : null);
   return {
     windMax: max((h) => h.wind),
     gustMax: max((h) => h.gust),

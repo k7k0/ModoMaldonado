@@ -1,0 +1,48 @@
+# Revisa una vez por mes si el SHN publicó tablas de un año que la app todavía no tiene.
+# Si aparece, abre un issue (GitHub avisa por mail al dueño del repo) con los pasos a seguir.
+name: Tablas del SHN de un año nuevo
+
+on:
+  schedule:
+    - cron: '0 12 1 * *' # día 1 de cada mes, 09:00 hora argentina
+  workflow_dispatch: # también se puede correr a mano desde la pestaña Actions
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Comparar años del SHN con los de la app
+        id: anios
+        run: |
+          shn=$(curl -sfL --retry 3 https://www.hidro.gov.ar/oceanografia/Tmareas/Form_Tmareas.asp \
+            | grep -oE 'value="20[0-9]{2}"' | grep -oE '20[0-9]{2}' | sort -n | tail -1)
+          app=$(jq '.years | max' src/data/ports.json)
+          echo "SHN: $shn  App: $app"
+          if [ -z "$shn" ]; then echo "No se pudo leer el formulario del SHN" >&2; exit 1; fi
+          if [ "$shn" -gt "$app" ]; then echo "nuevo=$shn" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Abrir issue (si no hay uno abierto)
+        if: steps.anios.outputs.nuevo
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANIO: ${{ steps.anios.outputs.nuevo }}
+        run: |
+          titulo="El SHN publicó las tablas de marea $ANIO"
+          if gh issue list --state open --search "$titulo in:title" --json number --jq '.[0].number' | grep -q .; then
+            echo "Ya hay un issue abierto"; exit 0
+          fi
+          gh issue create --title "$titulo" --body "Ya están en https://www.hidro.gov.ar/oceanografia/Tmareas/Form_Tmareas.asp
+
+          Para agregarlas a la app:
+
+          \`\`\`
+          npm run data:year $ANIO
+          npm run dev   # revisar
+          git add scripts/out public/data src/data && git commit -m \"Tablas del SHN $ANIO\" && git push
+          \`\`\`"

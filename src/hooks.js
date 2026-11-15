@@ -20,6 +20,25 @@ export function useNow(intervalMs = 30000) {
   return now;
 }
 
+/**
+ * Contador que sube cada vez que vuelve la conexión o la app vuelve a primer plano:
+ * sirve de dependencia para reintentar lo que falló por falta de señal.
+ */
+export function useRetryTick() {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const bump = () => setTick((n) => n + 1);
+    const onVisible = () => document.visibilityState === 'visible' && bump();
+    window.addEventListener('online', bump);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.removeEventListener('online', bump);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, []);
+  return tick;
+}
+
 /** Estado persistido en localStorage (tolerante a navegadores sin storage). */
 export function useStoredState(key, initial) {
   const [value, setValue] = useState(() => {

@@ -7,7 +7,8 @@ const hm = (m) => (m == null ? null : `${Math.floor(m / 60)}h ${String(m % 60).p
 
 /** Datos del puerto según el SHN (y correcciones aplicadas si es secundario). */
 export default function PortInfo({ port }) {
-  const rows = [['Posición', fmtCoords(port.lat, port.lon)]];
+  const posFrom = port.posFrom && portById.get(port.posFrom);
+  const rows = [['Posición', `${fmtCoords(port.lat, port.lon)}${posFrom ? ` (la de ${posFrom.name})` : ''}`]];
 
   if (port.type === 'secondary') {
     const patron = portById.get(port.patron);

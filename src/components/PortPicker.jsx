@@ -19,9 +19,13 @@ export default function PortPicker({ currentId, pos, onSelect, onClose }) {
   const list = useMemo(() => {
     const words = fold(q).split(/\s+/).filter(Boolean);
     return ports
-      .map((p) => ({ ...p, dist: pos ? distanceKm(pos.lat, pos.lon, p.lat, p.lon) : null, hay: fold(`${p.name} ${p.area ?? ''}`) }))
+      .map((p) => ({
+        ...p,
+        dist: pos && p.lat != null ? distanceKm(pos.lat, pos.lon, p.lat, p.lon) : null,
+        hay: fold(`${p.name} ${p.area ?? ''}`),
+      }))
       .filter((p) => words.every((w) => p.hay.includes(w)))
-      .sort((a, b) => (pos ? a.dist - b.dist : 0));
+      .sort((a, b) => (pos ? (a.dist ?? 1e9) - (b.dist ?? 1e9) : 0));
   }, [q, pos]);
 
   return (

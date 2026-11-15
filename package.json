@@ -9,7 +9,8 @@
     "build": "vite build",
     "preview": "vite preview --host",
     "data:scrape": "node scripts/scrape-secondary.mjs && node scripts/scrape-primary.mjs",
-    "data:build": "node scripts/build-data.mjs"
+    "data:build": "node scripts/build-data.mjs",
+    "data:year": "node scripts/update-year.mjs"
   },
   "dependencies": {
     "react": "18.3.1",

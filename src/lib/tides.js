@@ -14,22 +14,27 @@ export const dataRange = {
 
 const tableCache = new Map();
 
+/** Error de red al cargar una tabla (sin conexión y sin copia guardada). */
+export class OfflineError extends Error {}
+
 /** Tabla de un puerto patrón para un año: [{ t (ms), h (m), high (bool) }]. */
 function loadTable(id, year) {
   const key = `${year}/${id}`;
   if (!tableCache.has(key)) {
     const url = `${import.meta.env.BASE_URL}data/${year}/${id}.json`;
-    tableCache.set(
-      key,
-      fetch(url)
-        .then((r) => (r.ok ? r.json() : null))
-        .then((raw) => {
-          if (!raw) return [];
-          const base = dayStart(`${year}-01-01`);
-          return raw.t.map((t, i) => ({ t: base + t * MIN, h: raw.h[i] / 100, high: raw.k[i] === 'P' }));
-        })
-        .catch(() => []),
-    );
+    const promise = fetch(url)
+      .catch(() => {
+        // Un fallo de red no se recuerda: se reintenta cuando vuelva la conexión.
+        tableCache.delete(key);
+        throw new OfflineError(url);
+      })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((raw) => {
+        if (!raw) return [];
+        const base = dayStart(`${year}-01-01`);
+        return raw.t.map((t, i) => ({ t: base + t * MIN, h: raw.h[i] / 100, high: raw.k[i] === 'P' }));
+      });
+    tableCache.set(key, promise);
   }
   return tableCache.get(key);
 }
@@ -38,12 +43,14 @@ function loadTable(id, year) {
  * Pleamares y bajamares del puerto (patrón o secundario) para todos los años disponibles,
  * ordenadas por tiempo. Para un secundario se aplican las correcciones de hora y altura
  * de la Tabla de Puertos Secundarios del SHN sobre las del puerto patrón.
+ * Rechaza con OfflineError si alguna tabla no se pudo descargar.
  */
 export async function loadEvents(port) {
   const patronId = port.type === 'secondary' ? port.patron : port.id;
   const tables = await Promise.all(years.map((y) => loadTable(patronId, y)));
-  const seen = new Set();
-  let events = tables.flat().filter((e) => !seen.has(e.t) && seen.add(e.t));
+  // Cada tabla trae el final de diciembre del año anterior: sólo se usa en el primer año,
+  // en los demás manda la tabla de ese año (aunque el SHN la haya corregido).
+  let events = tables.flatMap((table, i) => (i ? table.filter((e) => e.t >= dayStart(`${years[i]}-01-01`)) : table));
   if (port.type === 'secondary') {
     const c = port.corr;
     events = events.map((e) => ({

@@ -24,9 +24,24 @@ node scripts/scrape-primary.mjs 2027     # Tablas de puertos patrones -> scripts
 npm run data:build                       # -> src/data/ports.json y public/data/<año>/*.json
 ```
 
-Para agregar un año nuevo cuando el SHN lo publique: correr `scrape-primary.mjs <año>` y
-`data:build`. Los años anteriores se conservan (cada `primary-<año>.json` genera su carpeta).
-Las descargas se cachean en `scripts/.cache` (borrarla para forzar una nueva descarga).
+### Año nuevo
+
+```sh
+npm run data:year 2027
+```
+
+Verifica que el SHN ya lo publique, borra `scripts/.cache` (si no, se reusan el formulario y la
+tabla de secundarios viejos), descarga secundarios y el año, regenera los datos y muestra qué
+puertos aparecieron, desaparecieron o cambiaron de corrección. Los años anteriores se conservan:
+no borrar `scripts/out/primary-<año>.json` de años que se quieran seguir mostrando (para sacar
+uno viejo, borrar ese archivo y `public/data/<año>/` y correr `npm run data:build`).
+
+`build-data` frena si el puerto por defecto o algún spot de Windguru (`src/config.js`) no existe
+en los datos, por ejemplo si el SHN cambió un nombre.
+
+Una GitHub Action (`.github/workflows/shn-nuevo-anio.yml`) revisa el día 1 de cada mes si el SHN
+publicó un año nuevo y, si es así, abre un issue con estos pasos. Se puede correr a mano desde la
+pestaña Actions.
 
 ### Cálculo
 
@@ -35,13 +50,15 @@ Las descargas se cachean en `scripts/.cache` (borrarla para forzar una nueva des
   hora y de altura de la Tabla de Puertos Secundarios. Se omiten los puertos que sólo tienen
   corrección para pleamares de sicigia (Malvinas). Si falta alguna corrección se usa la de
   pleamar (hora) o cero (altura) y el puerto se marca como aproximado.
+- **Canales sin posición propia** (Canal Principal a Bahía Blanca, calculado sobre Puerto Belgrano):
+  se usa la posición del puerto base para el sol y el pronóstico.
 - **Altura actual / curva:** interpolación cosenoidal entre mareas consecutivas.
 - **Sol y luna:** calculados localmente (algoritmo NOAA y mes sinódico medio).
 - **Pronóstico del tiempo** (viento en km/h, ráfagas, temperatura, lluvia): [Open-Meteo](https://open-meteo.com),
   CC BY 4.0. Viento, ráfagas y temperatura del modelo GFS (el que Windguru muestra por defecto);
   lluvia como mediana de GFS, ECMWF e ICON, ignorando menos de 0.2 mm/h. Es lo único que se consulta online; se guarda en el navegador y se refresca cada hora.
   Sin conexión se muestra el último pronóstico (hasta 3 días). Los spots de Windguru por puerto se
-  configuran en `WINDGURU_SPOTS` (`src/lib/weather.js`).
+  configuran en `WINDGURU_SPOTS` (`src/config.js`).
 
 ## Diseño
 

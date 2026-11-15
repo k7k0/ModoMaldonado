@@ -31,11 +31,14 @@ function parseHeader(html) {
   return {
     lat: lat ? -(+lat[1] + lat[2] / 60).toFixed(4) : null,
     lon: lon ? -(+lon[1] + lon[2] / 60).toFixed(4) : null,
-    charts: grab(/Carta\/s Argentina\/s:\s*(.*?)\s*Lat\./),
-    tz: grab(/Huso Horario:\s*([+-]?\d+)/),
+    // Canales calculados sobre otro puerto (p. ej. Canal Principal a Bahía Blanca): no traen
+    // posición, nivel medio ni huso en el formato de siempre, sólo en el texto explicativo.
+    basedOn: grab(/en base a la?s? predicciones de pleamares y bajamares de\s*(.*?)\s*,\s*aplicando/i),
+    charts: grab(/Carta\/s Argentina\/s:\s*(.*?)\s*Lat\./) ?? grab(/Cartas argentinas de referencia:\s*(.*?)\.\s*Las alturas/i),
+    tz: grab(/Huso Horario:\s*([+-]?\d+)/) ?? grab(/huso horario\s*([+-]\s*\d+)/i)?.replace(/\s+/g, ''),
     regime: grab(/Régimen de marea:\s*(.*?)\s*Establecimiento/),
     est: grab(/Establecimiento de puerto medio:\s*(.*?)\s*Nivel medio/),
-    meanLevel: num(grab(/Nivel medio:\s*([\d,]+)/)),
+    meanLevel: num(grab(/Nivel medio:\s*([\d,]+)/) ?? grab(/pasa\s*([\d,]+)\s*m debajo del nivel medio/)),
     stats: stats
       ? {
           hwMax: num(stats[1]),
