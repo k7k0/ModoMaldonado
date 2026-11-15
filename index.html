@@ -27,9 +27,18 @@
     <!-- iPhone: nombre al agregar a inicio y barra de estado sobre el header oscuro -->
     <meta name="apple-mobile-web-app-title" content="Modo Maldonado - Mareas" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- Instalable como app en todos los navegadores menos Samsung Internet: arma su propio
+         paquete de Android y Play Protect lo bloquea ("se diseñó para una versión anterior de
+         Android"). Ahí sólo queda el acceso directo común (sin conexión funciona igual). -->
+    <script>
+      if (!/SamsungBrowser/i.test(navigator.userAgent)) {
+        document.head.insertAdjacentHTML(
+          'beforeend',
+          '<meta name="mobile-web-app-capable" content="yes" /><link rel="manifest" href="/manifest.webmanifest" />',
+        );
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
